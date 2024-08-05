@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ProductRequest {
 
 	private String name;
-	private String price;
+	private Long price;
 	private String description;
 
 }

@@ -39,7 +39,7 @@ public class Product {
 	private String name;
 
 	@Column(nullable = false)
-	private String price;
+	private Long price;
 
 	private String description;
 
