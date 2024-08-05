@@ -2,6 +2,9 @@ package com.ims.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import javax.persistence.EntityNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,20 +38,47 @@ public class ProductService {
 		return "Product created successfully";
 	}
 
-	public String updateProductById(Product product) {
+	public String updateProductById(ProductRequest productRequest) {
 
-		Optional<Product> optionalDbProduct = productRepository.findById(product.getId());
+		Optional<Product> optionalDbProduct = productRepository.findById(productRequest.getId());
 
 		if (!optionalDbProduct.isPresent()) {
-			return "Product not found";
+			throw new EntityNotFoundException("Product not found with id: " + productRequest.getId());
 		}
 
 		Product dbProduct = optionalDbProduct.get();
+		Product product = new Product(productRequest.getId(), productRequest.getName(), productRequest.getPrice(),
+				productRequest.getDescription(), null, null);
 		dbUtils.updateNonNullProperties(product, dbProduct);
 		productRepository.save(dbProduct);
 
 		logger.info("Updated product in db with details : {}", dbProduct);
 		return "Product updated successfully";
+	}
+
+	public ProductRequest getProductById(UUID id) {
+
+		Optional<Product> optionalDbProduct = productRepository.findById(id);
+
+		if (!optionalDbProduct.isPresent()) {
+			throw new EntityNotFoundException("Product not found with id: " + id);
+		}
+
+		Product product = optionalDbProduct.get();
+		return new ProductRequest(product.getId(), product.getName(), product.getPrice(), product.getDescription());
+	}
+
+	public String deleteProductById(UUID id) {
+
+		Optional<Product> optionalDbProduct = productRepository.findById(id);
+
+		if (!optionalDbProduct.isPresent()) {
+			throw new EntityNotFoundException("Product not found with id: " + id);
+		}
+
+		productRepository.deleteById(id);
+		logger.info("Deleted product in db with id : {}", id);
+		return "Product deleted successfully";
 	}
 
 	public List<Product> getAllProducts() {
@@ -58,4 +88,5 @@ public class ProductService {
 	public Integer getAllProductsCount() {
 		return productRepository.findAll().size();
 	}
+
 }
