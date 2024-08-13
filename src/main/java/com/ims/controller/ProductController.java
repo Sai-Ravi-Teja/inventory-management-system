@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -81,6 +82,20 @@ public class ProductController {
 		return productService.deleteProductById(id);
 	}
 
+	@Operation(summary = "Get products by date range")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Products retrieved successfully", content = {
+					@Content(mediaType = "application/json", schema = @Schema(implementation = Product.class)) }),
+			@ApiResponse(responseCode = "400", description = "Invalid date format", content = @Content),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content) })
+	@GetMapping("/date-range")
+	@ResponseStatus(HttpStatus.OK)
+	public List<Product> getProductsByDateRange(@RequestParam("startDate") String startDateStr,
+			@RequestParam("endDate") String endDateStr) {
+
+		return productService.getProductsByDateRange(startDateStr, endDateStr);
+	}
+
 	@Operation(summary = "Get the list of all products")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Returened list of all products", content = {
@@ -98,7 +113,7 @@ public class ProductController {
 			@ApiResponse(responseCode = "200", description = "Returened count of products", content = {
 					@Content(mediaType = "application/json") }),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error") })
-	@GetMapping("/getAllProducts/Count")
+	@GetMapping("/getAllProducts/count")
 	@ResponseStatus(HttpStatus.OK)
 	public Integer getAllProductsCount() {
 

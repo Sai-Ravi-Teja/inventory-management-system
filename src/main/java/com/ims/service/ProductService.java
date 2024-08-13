@@ -1,5 +1,7 @@
 package com.ims.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,9 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.ims.dto.ProductRequest;
+import com.ims.exception.InvalidDateFormatException;
 import com.ims.model.Product;
 import com.ims.repository.ProductRepository;
 import com.ims.util.DatabaseUtils;
+import com.ims.util.DateTimeUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -73,12 +77,25 @@ public class ProductService {
 		Optional<Product> optionalDbProduct = productRepository.findById(id);
 
 		if (!optionalDbProduct.isPresent()) {
-			throw new EntityNotFoundException("Product not found with id: " + id);
+			throw new EntityNotFoundException("Product not found with id : " + id);
 		}
 
 		productRepository.deleteById(id);
 		logger.info("Deleted product in db with id : {}", id);
 		return "Product deleted successfully";
+	}
+
+	public List<Product> getProductsByDateRange(String startDateStr, String endDateStr) {
+
+		try {
+			LocalDateTime startDate = DateTimeUtils.formatDateTime(startDateStr);
+			LocalDateTime endDate = DateTimeUtils.formatDateTime(endDateStr);
+
+			return productRepository.findByCreatedDateBetween(startDate, endDate);
+
+		} catch (DateTimeParseException e) {
+			throw new InvalidDateFormatException("Invalid date format: " + e.getParsedString());
+		}
 	}
 
 	public List<Product> getAllProducts() {
