@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.ims.common.InventoryConstants;
 import com.ims.dto.ProductRequest;
 import com.ims.exception.InvalidDateFormatException;
 import com.ims.model.Product;
@@ -88,8 +89,8 @@ public class ProductService {
 	public List<Product> getProductsByDateRange(String startDateStr, String endDateStr) {
 
 		try {
-			LocalDateTime startDate = DateTimeUtils.formatDateTime(startDateStr);
-			LocalDateTime endDate = DateTimeUtils.formatDateTime(endDateStr);
+			LocalDateTime startDate = DateTimeUtils.formatDateTime(startDateStr, InventoryConstants.DATE_TIME_PATTERN);
+			LocalDateTime endDate = DateTimeUtils.formatDateTime(endDateStr, InventoryConstants.DATE_TIME_PATTERN);
 
 			return productRepository.findByCreatedDateBetween(startDate, endDate);
 
@@ -102,8 +103,8 @@ public class ProductService {
 		return productRepository.findAll();
 	}
 
-	public Integer getAllProductsCount() {
-		return productRepository.findAll().size();
+	public long getAllProductsCount() {
+		return productRepository.count();
 	}
 
 }

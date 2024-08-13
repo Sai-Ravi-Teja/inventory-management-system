@@ -1,8 +1,13 @@
 package com.ims.controller;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ims.common.InventoryConstants;
 import com.ims.dto.ProductRequest;
 import com.ims.model.Product;
 import com.ims.service.ProductService;
+import com.ims.util.ExportUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,6 +39,8 @@ import lombok.RequiredArgsConstructor;
 public class ProductController {
 
 	private final ProductService productService;
+
+	private final ExportUtil exportUtil;
 
 	@Operation(summary = "Create a product")
 	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "Product created successfully", content = {
@@ -115,9 +124,45 @@ public class ProductController {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error") })
 	@GetMapping("/getAllProducts/count")
 	@ResponseStatus(HttpStatus.OK)
-	public Integer getAllProductsCount() {
+	public long getAllProductsCount() {
 
 		return productService.getAllProductsCount();
+	}
+
+	@Operation(summary = "Export the products in CSV format")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Exported to CSV Format", content = {
+					@Content(mediaType = "application/json") }),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error") })
+	@GetMapping("/export/csv")
+	public void exportProductsToCsv(HttpServletResponse response) throws IOException {
+
+		String fileName = exportUtil.getFileName(InventoryConstants.CSV_FILE_FORMAT);
+		response.setContentType("text/csv");
+		response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+
+		List<Product> products = productService.getAllProducts();
+
+		try (PrintWriter writer = response.getWriter()) {
+			exportUtil.writeProductsToCsv(writer, products);
+		}
+	}
+
+	@Operation(summary = "Export the products in PDF format")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Exported to PDF Format", content = {
+					@Content(mediaType = "application/json") }),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error") })
+	@GetMapping("/export/pdf")
+	public void exportProductsToPdf(HttpServletResponse response) throws IOException {
+
+		String fileName = exportUtil.getFileName(InventoryConstants.PDF_FILE_FORMAT);
+		response.setContentType("application/pdf");
+		response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+
+		List<Product> products = productService.getAllProducts();
+
+		exportUtil.writeProductsToPdf(response.getOutputStream(), products);
 	}
 
 }
