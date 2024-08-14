@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.ims.common.InventoryConstants;
@@ -84,8 +85,9 @@ public class ExportUtil {
 			table.addCell(new Cell().add(new Paragraph(product.getName())).setFontSize(9).setBackgroundColor(bgColor));
 			table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getPrice()))).setFontSize(9)
 					.setBackgroundColor(bgColor));
-			table.addCell(
-					new Cell().add(new Paragraph(product.getDescription())).setFontSize(9).setBackgroundColor(bgColor));
+			table.addCell(new Cell()
+					.add(new Paragraph(null != product.getDescription() ? product.getDescription() : StringUtils.EMPTY))
+					.setFontSize(9).setBackgroundColor(bgColor));
 			table.addCell(
 					new Cell()
 							.add(new Paragraph(DateTimeUtils.formatISODateTime(product.getCreatedDate().toString(),

@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 public class ProductService {
 
 	private final ProductRepository productRepository;
-	private final DatabaseUtils dbUtils;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -54,7 +53,7 @@ public class ProductService {
 		Product dbProduct = optionalDbProduct.get();
 		Product product = new Product(productRequest.getId(), productRequest.getName(), productRequest.getPrice(),
 				productRequest.getDescription(), null, null);
-		dbUtils.updateNonNullProperties(product, dbProduct);
+		DatabaseUtils.updateNonNullProperties(product, dbProduct);
 		productRepository.save(dbProduct);
 
 		logger.info("Updated product in db with details : {}", dbProduct);
